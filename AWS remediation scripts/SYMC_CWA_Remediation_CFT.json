@@ -1,0 +1,453 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Description": "Symantec Cloud Workload Assurance - Remediation Cloud Formation Template",
+  "Parameters": {
+  "CWARemediationbucket":{
+    "Type":"String",
+    "Description":"S3 bucket where CWA remediation zip files are uploaded.",
+	"Default":"symc-cwa-remediation-bucket"
+	},
+	"InputSNSTopicName":{
+    "Type":"String",
+    "Description":"Name of SNS topic that receives remediation input payload."
+	},
+	"UpdateStatusInCWA":{
+	"Default": "true",
+	"AllowedValues": ["true", "false"],
+    "Type":"String",
+    "Description":"Do you want to update remediation status in CWA?"
+	},
+	"OutputSNSTopicName":{
+    "Type":"String",
+    "Description":"Name of SNS topic that receives remediation output payload, required only if you want to update remediation status in CWA.",
+	"Default":"Not required in case UpdateStatusInCWA is false."
+	},
+	"ClientID":{
+    "Type":"String",
+    "Description":"Client ID from CWA Settings-API Keys, required only if you want to update remediation status in CWA.",
+	"Default":"Not required in case UpdateStatusInCWA is false."
+	},
+	"ClientSecretKey":{
+    "Type":"String",
+    "Description":"Client Secret Key from CWA Settings-API Keys, required only if you want to update remediation status in CWA.",
+	"Default":"Not required in case UpdateStatusInCWA is false."
+	},
+	"CWARole":{
+    "Type":"String",
+    "Description":"CWA role for remediation that is configured in AWS connections."
+	}
+  },
+  "Conditions" : {
+    "CreateCloseLoop" : {"Fn::Equals" : [{"Ref" : "UpdateStatusInCWA"}, "true"]},
+	"DontCreateCloseLoop" : {"Fn::Equals" : [{"Ref" : "UpdateStatusInCWA"}, "false"]}
+  },
+  "Metadata":{  
+      "AWS::CloudFormation::Interface":{  
+         "ParameterGroups":[  
+            {  
+               "Parameters":[  
+                  "CWARemediationbucket",
+				  "CWARole",
+				  "InputSNSTopicName",
+				  "UpdateStatusInCWA"
+				  
+               ]
+            },
+            {  
+               "Parameters":[  
+                  "ClientID",
+                  "ClientSecretKey",
+				  "OutputSNSTopicName"
+               ],
+               "Label":{  
+                  "default":"Only In Case Of 'Update Status in CWA'"
+               }
+            }
+         ]
+         }
+   },
+  "Resources":{
+  	"OrchestratorLambdaRole": {
+		"Type": "AWS::IAM::Role",
+		"Properties": {
+		  "Path": "/",
+		  "Policies": [
+			{
+			  "PolicyName": "OrchestratorLambdaPolicy",
+			  "PolicyDocument": {
+				"Statement": [
+				  {
+					"Action": [
+					  "logs:CreateLogGroup",
+					  "logs:CreateLogStream",
+					  "logs:GetLogEvents",
+					  "logs:PutLogEvents"
+					],
+					"Resource": [ "arn:aws:logs:*:*:*" ],
+					"Effect": "Allow"
+				  },
+				 {
+					"Sid": "Stmt123456",
+					"Effect": "Allow",
+					"Action": [
+						"lambda:InvokeFunction"
+					],
+					"Resource": [
+						"*"
+					]
+				}
+				]
+			  }
+			}
+		  ],
+		  "AssumeRolePolicyDocument": {
+			"Statement": [
+			  {
+				"Action": [ "sts:AssumeRole" ],
+				"Effect": "Allow",
+				"Principal": {
+				  "Service": [ "lambda.amazonaws.com" ]
+				}
+			  }
+			]
+		  }
+		}
+	},
+	"WorkerLambdaRole": {
+		"Type": "AWS::IAM::Role",
+		"Condition" : "CreateCloseLoop",
+		"Properties": {
+		  "Path": "/",
+		  "Policies": [
+			{
+			  "PolicyName": "WorkerLambdaPolicy",
+			  "PolicyDocument": {
+				"Statement": [
+				  {
+					"Action": [
+					  "logs:CreateLogGroup",
+					  "logs:CreateLogStream",
+					  "logs:GetLogEvents",
+					  "logs:PutLogEvents"
+					],
+					"Resource": [ "arn:aws:logs:*:*:*" ],
+					"Effect": "Allow"
+				  },
+				{
+					"Effect": "Allow",
+					"Action":
+					[
+					"iam:GetAccountPasswordPolicy",
+					"iam:UpdateAccountPasswordPolicy",
+					"kms:Enable*",
+					"cloudtrail:UpdateTrail",
+					"s3:PutBucketVersioning"
+					],
+					"Resource": "*"
+				},
+				{
+					"Action" : [
+						"sns:Publish",
+						"sns:Subscribe"
+					],
+					"Effect" : "Allow",
+					"Resource" : [
+						{ "Ref" : "OutputSNSTopic" }
+					]
+				}
+				]
+			  }
+			}
+		  ],
+		  "AssumeRolePolicyDocument": {
+			"Statement": [
+			  {
+				"Action": [ "sts:AssumeRole" ],
+				"Effect": "Allow",
+				"Principal": {
+				  "Service": [ "lambda.amazonaws.com" ]
+				}
+			  }
+			]
+		  }
+		}
+   },
+   	"WorkerLambdaNonCLR": {
+		"Type": "AWS::IAM::Role",
+		"Condition" : "DontCreateCloseLoop",
+		"Properties": {
+		  "Path": "/",
+		  "Policies": [
+			{
+			  "PolicyName": "WorkerLambdaNonCLRPolicy",
+			  "PolicyDocument": {
+				"Statement": [
+				  {
+					"Action": [
+					  "logs:CreateLogGroup",
+					  "logs:CreateLogStream",
+					  "logs:GetLogEvents",
+					  "logs:PutLogEvents"
+					],
+					"Resource": [ "arn:aws:logs:*:*:*" ],
+					"Effect": "Allow"
+				  },
+				{
+					"Effect": "Allow",
+					"Action": "iam:*",
+					"Resource": "*"
+				}
+				]
+			  }
+			}
+		  ],
+		  "AssumeRolePolicyDocument": {
+			"Statement": [
+			  {
+				"Action": [ "sts:AssumeRole" ],
+				"Effect": "Allow",
+				"Principal": {
+				  "Service": [ "lambda.amazonaws.com" ]
+				}
+			  }
+			]
+		  }
+		}
+   },
+    "OrchestratorLambda": {
+      "Type": "AWS::Lambda::Function",
+      "Properties": {
+        "Handler": "lambda_function.lambda_handler",
+		"FunctionName": "symc_cwa_remediation_orchestrator",
+        "Runtime": "python3.7",
+        "Timeout": "300",
+        "MemorySize": "1024",
+        "Description": "Orchestrator Lambda that invokes the worker lambdas",
+		"Environment": {
+             "Variables": {
+                "WorkerLambdaRegion": {"Ref": "AWS::Region"}
+              }
+        },
+        "Role": {
+          "Fn::GetAtt": [
+            "OrchestratorLambdaRole",
+            "Arn"
+          ]
+        },
+        "Code": {
+        "S3Bucket": {"Ref": "CWARemediationbucket"},
+		"S3Key": "SYMC_CWA_Remediation_Orchestrator.zip"
+      }
+    }
+	},
+	  "WorkerLambda": {
+      "Type": "AWS::Lambda::Function",
+      "Properties": {
+        "Handler": "lambda_function.lambda_handler",
+		"FunctionName": "symc_cwa_remediation_worker_iampassword",
+        "Runtime": "python3.7",
+        "Timeout": "300",
+        "MemorySize": "1024",
+        "Description": "Worker Lambda that executes the remediation fixes",
+        "Role": {
+		  "Fn::If": [
+		  "CreateCloseLoop",
+          {"Fn::GetAtt": [
+            "WorkerLambdaRole",
+            "Arn"
+          ]},
+		  { "Fn::GetAtt": [
+            "WorkerLambdaNonCLR",
+            "Arn"
+          ]}
+		  ]
+        },
+        "Code": {
+        "S3Bucket": {"Ref": "CWARemediationbucket"},
+		"S3Key": "SYMC_CWA_Remediation_Worker_IAMPassword.zip"
+      }
+    }
+	},
+	"S3WorkerLambda": {
+      "Type": "AWS::Lambda::Function",
+      "Properties": {
+        "Handler": "lambda_function.lambda_handler",
+		"FunctionName": "symc_cwa_remediation_worker_s3",
+        "Runtime": "python3.7",
+        "Timeout": "300",
+        "MemorySize": "1024",
+        "Description": "Worker Lambda that executes the remediation fixes",
+        "Role": {
+		  "Fn::If": [
+		  "CreateCloseLoop",
+          {"Fn::GetAtt": [
+            "WorkerLambdaRole",
+            "Arn"
+          ]},
+		  { "Fn::GetAtt": [
+            "WorkerLambdaNonCLR",
+            "Arn"
+          ]}
+		  ]
+        },
+        "Code": {
+        "S3Bucket": {"Ref": "CWARemediationbucket"},
+		"S3Key": "SYMC_CWA_Remediation_Worker_S3.zip"
+      }
+    }
+	},
+	"KMSWorkerLambda": {
+      "Type": "AWS::Lambda::Function",
+      "Properties": {
+        "Handler": "lambda_function.lambda_handler",
+		"FunctionName": "symc_cwa_remediation_worker_kms",
+        "Runtime": "python3.7",
+        "Timeout": "300",
+        "MemorySize": "1024",
+        "Description": "Worker Lambda that executes the remediation fixes",
+        "Role": {
+		  "Fn::If": [
+		  "CreateCloseLoop",
+          {"Fn::GetAtt": [
+            "WorkerLambdaRole",
+            "Arn"
+          ]},
+		  { "Fn::GetAtt": [
+            "WorkerLambdaNonCLR",
+            "Arn"
+          ]}
+		  ]
+        },
+        "Code": {
+        "S3Bucket": {"Ref": "CWARemediationbucket"},
+		"S3Key": "SYMC_CWA_Remediation_Worker_KMS.zip"
+      }
+    }
+	},
+	"CloudTrailWorkerLambda": {
+      "Type": "AWS::Lambda::Function",
+      "Properties": {
+        "Handler": "lambda_function.lambda_handler",
+		"FunctionName": "symc_cwa_remediation_worker_cloudtrail",
+        "Runtime": "python3.7",
+        "Timeout": "300",
+        "MemorySize": "1024",
+        "Description": "Worker Lambda that executes the remediation fixes",
+        "Role": {
+		  "Fn::If": [
+		  "CreateCloseLoop",
+          {"Fn::GetAtt": [
+            "WorkerLambdaRole",
+            "Arn"
+          ]},
+		  { "Fn::GetAtt": [
+            "WorkerLambdaNonCLR",
+            "Arn"
+          ]}
+		  ]
+        },
+        "Code": {
+        "S3Bucket": {"Ref": "CWARemediationbucket"},
+		"S3Key": "SYMC_CWA_Remediation_Worker_CloudTrail.zip"
+      }
+    }
+	},
+	   "APICallLambda": {
+      "Type": "AWS::Lambda::Function",
+	  "Condition" : "CreateCloseLoop",
+      "Properties": {
+        "Handler": "lambda_function.lambda_handler",
+		"FunctionName": "symc_cwa_remediation_closedloop_api_call",
+        "Runtime": "python3.7",
+        "Timeout": "300",
+        "MemorySize": "1024",
+        "Description": "Lambda that calls the Public API of CWA for closed-loop remediation",
+		"Environment": {
+             "Variables": {
+                "ClientID": {"Ref": "ClientID"},
+				"ClientSecretKey": {"Ref": "ClientSecretKey"}
+              }
+        },
+        "Role": {
+          "Fn::GetAtt": [
+            "OrchestratorLambdaRole",
+            "Arn"
+          ]
+        },
+        "Code": {
+        "S3Bucket": {"Ref": "CWARemediationbucket"},
+		"S3Key": "SYMC_CWA_CLR_API_call.zip"
+      }
+    }
+	},
+	"InputSNSTopic": {
+    "Type": "AWS::SNS::Topic",
+    "Properties": {
+      "Subscription": [
+        {
+          "Endpoint": {
+            "Fn::GetAtt": [ "OrchestratorLambda", "Arn" ]
+          },
+          "Protocol": "lambda"
+        }
+      ],
+	  "TopicName" : { "Ref": "InputSNSTopicName" }
+    },
+    "DependsOn": [ "OrchestratorLambda" ]
+  },
+  	"OutputSNSTopic": {
+    "Type": "AWS::SNS::Topic",
+	"Condition" : "CreateCloseLoop",
+    "Properties": {
+      "Subscription": [
+        {
+          "Endpoint": {
+            "Fn::GetAtt": [ "APICallLambda", "Arn" ]
+          },
+          "Protocol": "lambda"
+        }
+      ],
+	  "TopicName" : { "Ref": "OutputSNSTopicName" }
+    },
+    "DependsOn": [ "APICallLambda" ]
+  },
+  "OrchestratorLambdaInvokePermission": {
+    "Type": "AWS::Lambda::Permission",
+    "Properties": {
+      "Action": "lambda:InvokeFunction",
+      "Principal": "sns.amazonaws.com",
+      "SourceArn": { "Ref": "InputSNSTopic" },
+      "FunctionName": {
+        "Fn::GetAtt": [ "OrchestratorLambda", "Arn" ]
+      }
+    }
+  },
+  "APILambdaInvokePermission": {
+    "Type": "AWS::Lambda::Permission",
+	"Condition" : "CreateCloseLoop",
+    "Properties": {
+      "Action": "lambda:InvokeFunction",
+      "Principal": "sns.amazonaws.com",
+      "SourceArn": { "Ref": "OutputSNSTopic" },
+      "FunctionName": {
+        "Fn::GetAtt": [ "APICallLambda", "Arn" ]
+      }
+    }
+  },
+  "CWAIAMPolicyForRemediation":{
+   "Type": "AWS::IAM::Policy",
+   "Properties": {
+      "PolicyName": "CWAIAMPolicyForRemediation",
+      "PolicyDocument": {
+         "Version" : "2012-10-17",
+         "Statement": [
+            { "Effect": "Allow", 
+			  "Action": "sns:Publish", 
+			  "Resource": { "Ref": "InputSNSTopic" }
+         }]
+      },
+      "Roles": [ { "Ref": "CWARole" }]
+   }
+ }
+}
+}
