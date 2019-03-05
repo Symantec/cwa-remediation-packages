@@ -1,0 +1,24 @@
+{
+"frameworks": {
+      "net46":{
+        "dependencies": {
+          "Dapper": "1.42.0",
+          "System.Data.SqlClient":"4.1.0",
+          "Microsoft.Azure.Management.Sql" : "1.28.0-preview",
+          "Newtonsoft.Json" : "10.0.3",
+          "Microsoft.WindowsAzure.ConfigurationManager":"3.2.1",          
+          "Microsoft.Rest.ClientRuntime":"3.0.0",
+          "Microsoft.Rest.ClientRuntime.Azure":"4.0.0",
+          "WindowsAzure.Storage":"8.1.4",
+          "Microsoft.Azure.Management.Fluent":"1.18.0",
+          "Microsoft.Azure.Management.ResourceManager.Fluent":"1.18.0",
+          "Microsoft.Azure.Management.Storage.Fluent":"1.18.0",         
+          "NETStandard.Library":"1.6.1",
+          "System.Net.Http":"4.3.0",
+          "Microsoft.WindowsAzure.Storage":"8.1.4",
+          "Microsoft.Azure.Management.Sql.Fluent":"1.18.0",
+          "Microsoft.Azure.Management.ResourceManager.Fluent.Core":"1.18.0"
+        }
+      }
+     }
+  }
