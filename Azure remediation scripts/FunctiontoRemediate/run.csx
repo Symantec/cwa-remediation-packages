@@ -72,10 +72,10 @@ class PropertiesEncrypt
 class ClientDetail
 {
     public string grant_type = "client_credentials";
-    public string client_id  = "54ae88e1-35f3-4342-9f53-514e21b8992e";
-    public string client_secret = "uwp3LbOjWHmoT9bZKlSJm77VCZKDnm0Fdc+zyCXmyRk=";
+    public string client_id  = "";
+    public string client_secret = "";
     public string resource = "https://management.azure.com/";
-    public string tenant_id = "3b217a9b-6c58-428b-b022-5ad741ce2016";
+    public string tenant_id = "";
 }
 
 class Result {
