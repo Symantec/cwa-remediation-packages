@@ -11,7 +11,7 @@
         }
     },
     "variables": {
-        "storageName": "[concat('cwa', uniqueString(parameters('siteName'), resourceGroup().id))]"
+        "storageName": "[concat('cwafunc', uniqueString(parameters('siteName'), resourceGroup().id))]"
     },
     "resources": [
         {
@@ -55,6 +55,10 @@
                         {
                             "name": "MyTable",
                             "value": "[concat('DefaultEndpointsProtocol=https;AccountName=',variables('storageName'),';AccountKey=',listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('storageName')), '2015-05-01-preview').key1)]"
+                        },
+                        {
+                            "name": "ROUTING_EXTENSION_VERSION",
+                            "value": "~0.2"
                         },
                         {
                             "name": "STORAGE_HOSTNAME",
