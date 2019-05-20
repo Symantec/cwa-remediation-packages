@@ -141,7 +141,9 @@
 					"iam:UpdateAccountPasswordPolicy",
 					"kms:Enable*",
 					"cloudtrail:UpdateTrail",
-					"s3:PutBucketVersioning"
+					"s3:PutBucketVersioning",
+          "s3:PutEncryptionConfiguration",
+          "s3:GetEncryptionConfiguration"
 					],
 					"Resource": "*"
 				},
