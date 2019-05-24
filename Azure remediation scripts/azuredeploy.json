@@ -61,16 +61,16 @@
                             "value": "~0.2"
                         },
                         {
-                            "name": "STORAGE_HOSTNAME",
-                            "value": "[concat(variables('storageName'), '.blob.core.windows.net')]"
+                            "name": "CLIENT_ID",
+                            "value": "Blank"
                         },
                         {
-                            "name": "STORAGE_KEY",
-                            "value": "[listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('storageName')), '2015-05-01-preview').key1]"
+                            "name": "CLIENT_SECRET",
+                            "value": "Blank"
                         },
                         {
-                            "name": "STORAGE_CONNECTION",
-                            "value": "[concat('DefaultEndpointsProtocol=https;AccountName=',variables('storageName'),';AccountKey=',listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('storageName')), '2015-05-01-preview').key1)]"
+                            "name": "DIRECTORY_ID",
+                            "value": "Blank"
                         }
                     ]
                 },
