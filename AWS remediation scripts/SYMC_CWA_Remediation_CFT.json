@@ -142,8 +142,18 @@
 					"kms:Enable*",
 					"cloudtrail:UpdateTrail",
 					"s3:PutBucketVersioning",
-          "s3:PutEncryptionConfiguration",
-          "s3:GetEncryptionConfiguration"
+					"s3:GetBucketVersioning",
+					"s3:PutBucketLogging",
+					"s3:GetBucketLogging",
+					"s3:PutEncryptionConfiguration",
+					"s3:GetEncryptionConfiguration",
+					"s3:PutBucketAcl",
+					"s3:GetBucketAcl",
+					"s3:DeleteBucketPolicy",
+					"s3:PutBucketPublicAccessBlock",
+					"s3:GetBucketPublicAccessBlock",
+					"s3:PutBucketPolicy",
+					"s3:GetBucketPolicy"
 					],
 					"Resource": "*"
 				},
@@ -295,6 +305,146 @@
         "Code": {
         "S3Bucket": {"Ref": "CWARemediationbucket"},
 		"S3Key": "SYMC_CWA_Remediation_Worker_S3.zip"
+      }
+    }
+	},
+	"S3CTLoggingWorkerLambda": {
+      "Type": "AWS::Lambda::Function",
+      "Properties": {
+        "Handler": "lambda_function.lambda_handler",
+		"FunctionName": "symc_cwa_remediation_worker_s3_ct_logging",
+        "Runtime": "python3.7",
+        "Timeout": "300",
+        "MemorySize": "1024",
+        "Description": "Worker Lambda that executes the remediation fixes",
+        "Role": {
+		  "Fn::If": [
+		  "CreateCloseLoop",
+          {"Fn::GetAtt": [
+            "WorkerLambdaRole",
+            "Arn"
+          ]},
+		  { "Fn::GetAtt": [
+            "WorkerLambdaNonCLR",
+            "Arn"
+          ]}
+		  ]
+        },
+        "Code": {
+        "S3Bucket": {"Ref": "CWARemediationbucket"},
+		"S3Key": "symc_cwa_remediation_worker_enable_s3_cloudtrail_logging.zip"
+      }
+    }
+	},
+	"S3ALenabledWorkerLambda": {
+      "Type": "AWS::Lambda::Function",
+      "Properties": {
+        "Handler": "lambda_function.lambda_handler",
+		"FunctionName": "symc_cwa_remediation_worker_s3_AL_enabled",
+        "Runtime": "python3.7",
+        "Timeout": "300",
+        "MemorySize": "1024",
+        "Description": "Worker Lambda that executes the remediation fixes",
+        "Role": {
+		  "Fn::If": [
+		  "CreateCloseLoop",
+          {"Fn::GetAtt": [
+            "WorkerLambdaRole",
+            "Arn"
+          ]},
+		  { "Fn::GetAtt": [
+            "WorkerLambdaNonCLR",
+            "Arn"
+          ]}
+		  ]
+        },
+        "Code": {
+        "S3Bucket": {"Ref": "CWARemediationbucket"},
+		"S3Key": "symc_cwa_remediation_worker_s3_access_logging_enabled.zip"
+      }
+    }
+	},
+	"S3ACLAccessWorkerLambda": {
+      "Type": "AWS::Lambda::Function",
+      "Properties": {
+        "Handler": "lambda_function.lambda_handler",
+		"FunctionName": "symc_cwa_remediation_worker_s3_diable_acl_access",
+        "Runtime": "python3.7",
+        "Timeout": "300",
+        "MemorySize": "1024",
+        "Description": "Worker Lambda that executes the remediation fixes",
+        "Role": {
+		  "Fn::If": [
+		  "CreateCloseLoop",
+          {"Fn::GetAtt": [
+            "WorkerLambdaRole",
+            "Arn"
+          ]},
+		  { "Fn::GetAtt": [
+            "WorkerLambdaNonCLR",
+            "Arn"
+          ]}
+		  ]
+        },
+        "Code": {
+        "S3Bucket": {"Ref": "CWARemediationbucket"},
+		"S3Key": "symc_cwa_remediation_worker_s3_disable_ACL_public_access.zip"
+      }
+    }
+	},
+	"S3BucketPolicyWorkerLambda": {
+      "Type": "AWS::Lambda::Function",
+      "Properties": {
+        "Handler": "lambda_function.lambda_handler",
+		"FunctionName": "symc_cwa_remediation_worker_s3_disable_bucketpolicyAccess",
+        "Runtime": "python3.7",
+        "Timeout": "300",
+        "MemorySize": "1024",
+        "Description": "Worker Lambda that executes the remediation fixes",
+        "Role": {
+		  "Fn::If": [
+		  "CreateCloseLoop",
+          {"Fn::GetAtt": [
+            "WorkerLambdaRole",
+            "Arn"
+          ]},
+		  { "Fn::GetAtt": [
+            "WorkerLambdaNonCLR",
+            "Arn"
+          ]}
+		  ]
+        },
+        "Code": {
+        "S3Bucket": {"Ref": "CWARemediationbucket"},
+		"S3Key": "symc_cwa_remediation_worker_s3_disable_BucketPolicy_public_access.zip"
+      }
+    }
+	},
+	"S3PrivateWorkerLambda": {
+      "Type": "AWS::Lambda::Function",
+      "Properties": {
+        "Handler": "lambda_function.lambda_handler",
+		"FunctionName": "symc_cwa_remediation_worker_s3_private",
+        "Runtime": "python3.7",
+        "Timeout": "300",
+        "MemorySize": "1024",
+        "Description": "Worker Lambda that executes the remediation fixes",
+        "Role": {
+		  "Fn::If": [
+		  "CreateCloseLoop",
+          {"Fn::GetAtt": [
+            "WorkerLambdaRole",
+            "Arn"
+          ]},
+		  { "Fn::GetAtt": [
+            "WorkerLambdaNonCLR",
+            "Arn"
+          ]}
+		  ]
+        },
+        "Code": {
+        "S3Bucket": {"Ref": "CWARemediationbucket"},
+		"S3Key": "symc_cwa_remediation_worker_Ensure_S3_private.zip"
       }
     }
 	},
