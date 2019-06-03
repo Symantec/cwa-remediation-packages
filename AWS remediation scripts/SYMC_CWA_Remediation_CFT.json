@@ -312,7 +312,7 @@
       "Type": "AWS::Lambda::Function",
       "Properties": {
         "Handler": "lambda_function.lambda_handler",
-		"FunctionName": "symc_cwa_remediation_worker_s3_ct_logging",
+		"FunctionName": "symc_cwa_remediation_worker_enable_s3_cloudtrail_logging",
         "Runtime": "python3.7",
         "Timeout": "300",
         "MemorySize": "1024",
@@ -340,7 +340,7 @@
       "Type": "AWS::Lambda::Function",
       "Properties": {
         "Handler": "lambda_function.lambda_handler",
-		"FunctionName": "symc_cwa_remediation_worker_s3_AL_enabled",
+		"FunctionName": "symc_cwa_remediation_worker_s3_disable_ACL_public_access",
         "Runtime": "python3.7",
         "Timeout": "300",
         "MemorySize": "1024",
@@ -368,7 +368,7 @@
       "Type": "AWS::Lambda::Function",
       "Properties": {
         "Handler": "lambda_function.lambda_handler",
-		"FunctionName": "symc_cwa_remediation_worker_s3_diable_acl_access",
+		"FunctionName": "symc_cwa_remediation_worker_s3_disable_BucketPolicy_public_access",
         "Runtime": "python3.7",
         "Timeout": "300",
         "MemorySize": "1024",
@@ -424,7 +424,7 @@
       "Type": "AWS::Lambda::Function",
       "Properties": {
         "Handler": "lambda_function.lambda_handler",
-		"FunctionName": "symc_cwa_remediation_worker_s3_private",
+		"FunctionName": "symc_cwa_remediation_worker_Ensure_S3_private",
         "Runtime": "python3.7",
         "Timeout": "300",
         "MemorySize": "1024",
