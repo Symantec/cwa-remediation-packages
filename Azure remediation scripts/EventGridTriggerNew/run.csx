@@ -13,7 +13,7 @@ public static async Task Run(
     var event_data = gridevent.Data.ToString();
     log.LogInformation(event_data);
     
-    string instanceId = await starter.StartNewAsync("OrchestratorRem", event_data);
+    string instanceId = await starter.StartNewAsync("OrchestratorReme", event_data);
     log.LogInformation($"Started orchestration with ID = '{instanceId}'.");
     
 }
