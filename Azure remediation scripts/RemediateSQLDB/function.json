@@ -1,8 +1,9 @@
 {
   "bindings": [
     {
-      "name": "name",
+      "name": "tuple1",
       "type": "activityTrigger",
+      "activity": "RemediateSQLDB",
       "direction": "in"
     }
   ],
