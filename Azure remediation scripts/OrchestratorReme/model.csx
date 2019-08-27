@@ -1,5 +1,9 @@
+public class PayloadStruct
+    {
+        public Payload payload;
+    }
 
-    public class Payload
+public class Payload
     {
         public string payload_id {get;set;}
         public List<Check> checks;
