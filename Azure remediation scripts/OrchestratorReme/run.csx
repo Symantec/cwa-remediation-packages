@@ -1,4 +1,4 @@
-//test compilation
+//test compilation1
 #r "Microsoft.Azure.WebJobs.Extensions.DurableTask"
 #r "Newtonsoft.Json"
 #load "model.csx"
@@ -55,9 +55,9 @@ private static string GetAccessToken(ILogger log1)
 
 private static Tuple<string, string> ReadCheckConfig(string check_id, string path, ILogger log)
 {
+  log.LogInformation("Parsing check config file: "); 
   var result1 = Tuple.Create("", "");
-  //Console.WriteLine("Test Console");
-  
+
   FileStream fsSource = new FileStream(path, FileMode.Open, FileAccess.Read);
   using (StreamReader sr = new StreamReader(fsSource))
   {
@@ -65,9 +65,9 @@ private static Tuple<string, string> ReadCheckConfig(string check_id, string pat
       {
        string line = sr.ReadLine();
        log.LogInformation(line);
-       bool s = line.Contains(check_id);
-       log.LogInformation("s: "+s);
-       if (s)
+       bool ignoreCaseSearchResult = line.StartsWith(check_id);
+       log.LogInformation("Search for check_id "+check_id+" is :"+ignoreCaseSearchResult);
+       if (ignoreCaseSearchResult)
         {
            log.LogInformation("Check "+ check_id +" found in config file");
            var fields = line.Split(':');
@@ -78,16 +78,9 @@ private static Tuple<string, string> ReadCheckConfig(string check_id, string pat
            string f2 = fields[2].Trim();
            log.LogInformation("Function Module: "+ f2);
 
-           var result = Tuple.Create(f1, f2);
-           return result;
-
-        }else
-        {
-           log.LogInformation("Error: Could not find the check "+ check_id +" in config file");
-           log.LogInformation("Resolve: Manually enter <check_id>:<Function_App>:<Function_Module> ");
+           result1 = Tuple.Create(f1, f2);
            return result1;
         }
-
       }
 
       log.LogInformation("Error: The Check Config file is Empty!!");
@@ -157,6 +150,7 @@ public static void Run(DurableOrchestrationContext context, ILogger log, Executi
   log.LogInformation("Token: "+ stoken);
   
   foreach (string check in checklist){
+     log.LogInformation("Check Traced: "+ check);
      Tuple<string,string> getFunctionApp = ReadCheckConfig(check, path, log);
      string functionapp = getFunctionApp.Item1;
      string moduleapp = getFunctionApp.Item2;
