@@ -10,7 +10,7 @@
 #r "Microsoft.Azure.WebJobs.Extensions.DurableTask"
 #r "Newtonsoft.Json"
 #load "properties.csx"
-/*test*/
+//test compilation3
 
 using System;
 using System.Net;
@@ -22,21 +22,37 @@ using System.Text;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
-private string Data_Encryption(string endpoint,string resource_id, ILogger log){
 
-    string jsonContent1;
+private static void Data_Encryption(string resource_id, ILogger log, string stoken){
+   
+   var httpClient = new HttpClient();
+   httpClient.DefaultRequestHeaders.Add("Authorization", "Bearer " + stoken);
+
+   string endpoint = "https://management.azure.com";
+
    PropertiesEncrypt PropEnc = new PropertiesEncrypt();
    endpoint = endpoint + resource_id + "/transparentDataEncryption/current?api-version=2014-04-01";
    log.LogInformation("URL for API: "+endpoint);
    PropEnc.status =  "Enabled";
    EncryptionProp ep = new EncryptionProp();
-   ep.properties = PropEnc;
-   string jsonContent1 = JsonConvert.SerializeObject(ep);  
+   ep.properties = PropEnc;  
+   var content = new StringContent(JsonConvert.SerializeObject(ep), Encoding.UTF8, "application/json");
+   //log.LogInformation("content: ", content);
+   var response = httpClient.PutAsync(endpoint,content).Result;
+   string result = response.Content.ReadAsStringAsync().Result.ToString();
 
-   return jsonContent1;
+   log.LogInformation("SQL setting:" + result);
+   string statuscode = response.StatusCode.ToString();
+
+   log.LogInformation("Status code for API:" + statuscode);
 }
 
-private string Enable_ThreatD(string endpoint,string resource_id, ILogger log){
+private static void Enable_ThreatD(string resource_id, ILogger log, string stoken){
+
+   var httpClient = new HttpClient();
+   httpClient.DefaultRequestHeaders.Add("Authorization", "Bearer " + stoken);
+   
+   string endpoint = "https://management.azure.com";
 
    Properties prop = new Properties();
    endpoint = endpoint + resource_id + "/securityAlertPolicies/default?api-version=2014-04-01";
@@ -46,13 +62,23 @@ private string Enable_ThreatD(string endpoint,string resource_id, ILogger log){
    prop.emailAddresses = "abc@symantec.com";
    propobj p = new propobj();
    p.properties = prop;
-   string jsonContent1 = JsonConvert.SerializeObject(p);
-   return jsonContent1;
+   var content = new StringContent(JsonConvert.SerializeObject(p), Encoding.UTF8, "application/json");
+   //log.LogInformation("content: ", content);
+   var response = httpClient.PutAsync(endpoint,content).Result;
+   string result = response.Content.ReadAsStringAsync().Result.ToString();
+
+   log.LogInformation("SQL setting:" + result);
+   string statuscode = response.StatusCode.ToString();
+
+   log.LogInformation("Status code for API:" + statuscode);
 }
 
 
-private string Threat_Retn90(string endpoint,string resource_id, ILogger log){
-
+private static void Threat_Retn90(string resource_id, ILogger log, string stoken){
+   
+   var httpClient = new HttpClient();
+   httpClient.DefaultRequestHeaders.Add("Authorization", "Bearer " + stoken);
+   string endpoint = "https://management.azure.com";
    Properties prop = new Properties();
    endpoint = endpoint + resource_id + "/securityAlertPolicies/default?api-version=2014-04-01";
    log.LogInformation("endpoint: " + endpoint);            
@@ -62,12 +88,23 @@ private string Threat_Retn90(string endpoint,string resource_id, ILogger log){
    prop.retentionDays = 95;
    propobj p = new propobj();
    p.properties = prop;
-   string jsonContent1 = JsonConvert.SerializeObject(p);
-   return jsonContent1;
+   //string jsonContent1 = JsonConvert.SerializeObject(p);
+   var content = new StringContent(JsonConvert.SerializeObject(p), Encoding.UTF8, "application/json");
+   //log.LogInformation("content: ", content);
+   var response = httpClient.PutAsync(endpoint,content).Result;
+   string result = response.Content.ReadAsStringAsync().Result.ToString();
+
+   log.LogInformation("SQL setting:" + result);
+   string statuscode = response.StatusCode.ToString();
+
+   log.LogInformation("Status code for API:" + statuscode);
 }
 
-private string Send_Alert(string endpoint, string resource_id, ILogger log){
+private static void Send_Alert(string resource_id, ILogger log, string stoken){
 
+   var httpClient = new HttpClient();
+   httpClient.DefaultRequestHeaders.Add("Authorization", "Bearer " + stoken);
+   string endpoint = "https://management.azure.com";
    Properties prop = new Properties();
    endpoint = endpoint + resource_id + "/securityAlertPolicies/default?api-version=2014-04-01";
    log.LogInformation("endpoint: " + endpoint);            
@@ -76,13 +113,24 @@ private string Send_Alert(string endpoint, string resource_id, ILogger log){
    prop.emailAddresses = "abc@symantec.com";
    propobj p = new propobj();
    p.properties = prop;
-   string jsonContent1 = JsonConvert.SerializeObject(p);
-   return jsonContent1;
+   //string jsonContent1 = JsonConvert.SerializeObject(p);test
+   var content = new StringContent(JsonConvert.SerializeObject(p), Encoding.UTF8, "application/json");
+   //log.LogInformation("content: ", content);
+   var response = httpClient.PutAsync(endpoint,content).Result;
+   string result = response.Content.ReadAsStringAsync().Result.ToString();
+
+   log.LogInformation("SQL setting:" + result);
+   string statuscode = response.StatusCode.ToString();
+
+   log.LogInformation("Status code for API:" + statuscode);
 }
 
-private string Detection_Type_All(string endpoint,string resource_id, ILogger log){
- 
- Properties prop = new Properties();
+private static void Detection_Type_All(string resource_id, ILogger log, string stoken){
+
+   var httpClient = new HttpClient();
+   httpClient.DefaultRequestHeaders.Add("Authorization", "Bearer " + stoken); 
+   string endpoint = "https://management.azure.com";
+   Properties prop = new Properties();
    endpoint = endpoint + resource_id + "/securityAlertPolicies/default?api-version=2014-04-01";
    log.LogInformation("endpoint: " + endpoint);            
    prop.state = "Enabled";
@@ -91,12 +139,24 @@ private string Detection_Type_All(string endpoint,string resource_id, ILogger lo
    prop.disabledAlerts = "";
    propobj p = new propobj();
    p.properties = prop;
-   string jsonContent1 = JsonConvert.SerializeObject(p);
-   return jsonContent1;
+   //string jsonContent1 = JsonConvert.SerializeObject(p);
+   var content = new StringContent(JsonConvert.SerializeObject(p), Encoding.UTF8, "application/json");
+   //log.LogInformation("content: ", content);
+   var response = httpClient.PutAsync(endpoint,content).Result;
+   string result = response.Content.ReadAsStringAsync().Result.ToString();
+
+   log.LogInformation("SQL setting:" + result);
+   string statuscode = response.StatusCode.ToString();
+
+   log.LogInformation("Status code for API:" + statuscode);
    
 }
 
-private string Email_Service(string endpoint,string resource_id, ILogger log){
+private static void Email_Service(string resource_id, ILogger log, string stoken){
+
+   var httpClient = new HttpClient();
+   httpClient.DefaultRequestHeaders.Add("Authorization", "Bearer " + stoken); 
+   string endpoint = "https://management.azure.com";
    Properties prop = new Properties();
    endpoint = endpoint + resource_id + "/securityAlertPolicies/default?api-version=2014-04-01";
    log.LogInformation("endpoint: " + endpoint);            
@@ -105,57 +165,62 @@ private string Email_Service(string endpoint,string resource_id, ILogger log){
    prop.emailAddresses = "abc@symantec.com";
    propobj p = new propobj();
    p.properties = prop;
-   string jsonContent1 = JsonConvert.SerializeObject(p);
-   return jsonContent1;
+   //string jsonContent1 = JsonConvert.SerializeObject(p);
+   var content = new StringContent(JsonConvert.SerializeObject(p), Encoding.UTF8, "application/json");
+   //log.LogInformation("content: ", content);
+   var response = httpClient.PutAsync(endpoint,content).Result;
+   string result = response.Content.ReadAsStringAsync().Result.ToString();
+
+   log.LogInformation("SQL setting:" + result);
+   string statuscode = response.StatusCode.ToString();
+
+   log.LogInformation("Status code for API:" + statuscode);
    
 }
 
 
 public static void Run(Tuple<string, string, string> tuple1, ILogger log)
 {
+   //test1
    log.LogInformation("Activity function RemediateSQLDB started...");
-
    string module_id = tuple1.Item1;
+   log.LogInformation("Calling module: "+ module_id);
    string resource_id = tuple1.Item2;
    string stoken = tuple1.Item3;
-   // string resource_id = "/subscriptions/6bcc4190-5f36-4d8f-ae67-91edd41ad9d2/resourceGroups/CCS-Test-Resource-Group/providers/Microsoft.Sql/servers/testcwa/databases/TestPCSQLDB1";
    log.LogInformation("Remediation started for resource with ID: ");
    log.LogInformation(resource_id);
 
-   var httpClient = new HttpClient();
-   httpClient.DefaultRequestHeaders.Add("Authorization", "Bearer " + stoken);
-
-   string endpoint = "https://management.azure.com";
-   string jsonContent="";
-
    if (module_id == "Data_Encryption"){
-       jsonContent = Data_Encryption(endpoint, resource_id, log);
+       Data_Encryption(resource_id, log, stoken);
    }
    
    if (module_id == "Enable_ThreatD"){
-       jsonContent = Enable_ThreatD(endpoint, resource_id, log);
+       Enable_ThreatD(resource_id, log, stoken);
    }
 
    if (module_id == "Threat_Retn90"){
-       jsonContent = Threat_Retn90(endpoint, resource_id, log);
+       Threat_Retn90(resource_id, log, stoken);
    }
 
    if (module_id == "Send_Alert"){
-       jsonContent = Send_Alert(endpoint, resource_id, log);
+       Send_Alert(resource_id, log, stoken);
    }
 
    if (module_id == "Detection_Type_All"){
-       jsonContent = Detection_Type_All(endpoint, resource_id, log);
+       Detection_Type_All(resource_id, log, stoken);
    }
 
    if (module_id == "Email_Service"){
-       jsonContent = Email_Service(endpoint, resource_id, log);
+       Email_Service(resource_id, log, stoken);
    }
    
-
+   
+  /*test
    if (jsonContent != ""){
+        log.LogInformation("jsonContent: ", jsonContent);
         var content = new StringContent(jsonContent, Encoding.UTF8, "application/json");
-
+        
+        log.LogInformation("content: ", content);
         var response = httpClient.PutAsync(endpoint, content).Result;
         string result = response.Content.ReadAsStringAsync().Result.ToString();
 
@@ -168,4 +233,5 @@ public static void Run(Tuple<string, string, string> tuple1, ILogger log)
        log.LogInformation("Received blank jsonContent !!");
        log.LogInformation("Error while running module: "+ module_id);
    }
+   */
 }
