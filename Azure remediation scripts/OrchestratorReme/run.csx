@@ -1,6 +1,4 @@
-
-
-//#r "Microsoft.Azure.WebJobs.Extensions.DurableTask"
+//test compilation
 #r "Microsoft.Azure.WebJobs.Extensions.DurableTask"
 #r "Newtonsoft.Json"
 #load "model.csx"
@@ -46,8 +44,11 @@ private static string GetAccessToken(ILogger log1)
     keyValues.Add(new KeyValuePair<string, string>("resource", cd.resource));
 
     var httpClient = new HttpClient();
+    log1.LogInformation("https://login.microsoftonline.com/" + cd.tenant_id +"/oauth2/token");
     var response = httpClient.PostAsync("https://login.microsoftonline.com/" + cd.tenant_id +"/oauth2/token", new FormUrlEncodedContent(keyValues)).Result;
-    string result = response.Content.ReadAsStringAsync().Result.ToString();    
+    log1.LogInformation("response :" +response);
+    string result = response.Content.ReadAsStringAsync().Result.ToString(); 
+    log1.LogInformation("result :" +result); 
     Result rs = JsonConvert.DeserializeObject<Result>(result);
     return rs.access_token;    
 }
@@ -57,22 +58,50 @@ private static Tuple<string, string> ReadCheckConfig(string check_id, string pat
   var result1 = Tuple.Create("", "");
   //Console.WriteLine("Test Console");
   
+  foreach (var line in File.ReadAllLines(path))
+  {
+    if (line.Contains(check_id))
+    {
+        log.LogInformation("Found checkid" + check_id);
+        log.LogInformation("Check "+ check_id +" found in config file");
+        var fields = line.Split(':');
+        string f0 = fields[0].Trim();
+        log.LogInformation("Check ID: "+ f0);
+        string f1 = fields[1].Trim();
+        log.LogInformation("Function App: "+ f1);
+        string f2 = fields[2].Trim();
+        log.LogInformation("Function Module: "+ f2);
+
+        var result = Tuple.Create(f1, f2);
+        return result;
+    }else
+    {
+        log.LogInformation("Error: Could not find the check "+ check_id +" in config file");
+        log.LogInformation("Resolve: Manually enter <check_id>:<Function_App>:<Function_Module> ");
+        return result1;
+    }
+  }
+
+  /*
   FileStream fsSource = new FileStream(path, FileMode.Open, FileAccess.Read);
   using (StreamReader sr = new StreamReader(fsSource))
   {
       while(!sr.EndOfStream)
       {
        string line = sr.ReadLine();
-       if (line.Contains(check_id))
+       log.LogInformation(line);
+       bool s = line.Contains(check_id);
+       log.LogInformation("s: "+s);
+       if (s)
         {
            log.LogInformation("Check "+ check_id +" found in config file");
            var fields = line.Split(':');
            string f0 = fields[0].Trim();
-           //log.LogInformation("Check ID: "+ f0);
+           log.LogInformation("Check ID: "+ f0);
            string f1 = fields[1].Trim();
-           //log.LogInformation("Function App: "+ f1);
+           log.LogInformation("Function App: "+ f1);
            string f2 = fields[2].Trim();
-           //log.LogInformation("Function Module: "+ f2);
+           log.LogInformation("Function Module: "+ f2);
 
            var result = Tuple.Create(f1, f2);
            return result;
@@ -84,7 +113,8 @@ private static Tuple<string, string> ReadCheckConfig(string check_id, string pat
            return result1;
         }
 
-      }
+      } */
+
       log.LogInformation("Error: The Check Config file is Empty!!");
       return result1;
     }  
@@ -131,16 +161,16 @@ public static void Run(DurableOrchestrationContext context, ILogger log, Executi
    
 
   //Check for event_data
-  Payload data = JsonConvert.DeserializeObject<Payload>(event_data);
-  log.LogInformation("Payload ID : " + data.payload_id);
-  log.LogInformation("Resource account : " + data.resource.account_id);
-  log.LogInformation("Resource Name : " + data.resource.name);
-  log.LogInformation("Resource region : " + data.resource.region);
-  string resource_type = GetResourceType(data.resource.id);
+  PayloadStruct data = JsonConvert.DeserializeObject<PayloadStruct>(event_data);
+  log.LogInformation("Payload ID : " + data.payload.payload_id);
+  log.LogInformation("Resource account : " + data.payload.resource.account_id);
+  log.LogInformation("Resource Name : " + data.payload.resource.name);
+  log.LogInformation("Resource region : " + data.payload.resource.region);
+  string resource_type = GetResourceType(data.payload.resource.id);
   log.LogInformation("Resource Type : " + resource_type);
 
-  string resource_id = data.resource.id; 
-  List<Check> checks = data.checks;
+  string resource_id = data.payload.resource.id; 
+  List<Check> checks = data.payload.checks;
   List<string> checklist = GetCheckIDs(checks);
 
   //get the path of check config file
@@ -161,7 +191,7 @@ public static void Run(DurableOrchestrationContext context, ILogger log, Executi
 
          log.LogInformation("Calling Function : "+ functionapp);
          var tuple1 = Tuple.Create(moduleapp, resource_id, stoken);
-         context.CallSubOrchestratorAsync(functionapp, tuple1);
+         context.CallActivityAsync(functionapp, tuple1);
      }else{
          log.LogInformation("Error: Pre-requisite Function App or Module Name missing!!");
      }
