@@ -58,31 +58,6 @@ private static Tuple<string, string> ReadCheckConfig(string check_id, string pat
   var result1 = Tuple.Create("", "");
   //Console.WriteLine("Test Console");
   
-  foreach (var line in File.ReadAllLines(path))
-  {
-    if (line.Contains(check_id))
-    {
-        log.LogInformation("Found checkid" + check_id);
-        log.LogInformation("Check "+ check_id +" found in config file");
-        var fields = line.Split(':');
-        string f0 = fields[0].Trim();
-        log.LogInformation("Check ID: "+ f0);
-        string f1 = fields[1].Trim();
-        log.LogInformation("Function App: "+ f1);
-        string f2 = fields[2].Trim();
-        log.LogInformation("Function Module: "+ f2);
-
-        var result = Tuple.Create(f1, f2);
-        return result;
-    }else
-    {
-        log.LogInformation("Error: Could not find the check "+ check_id +" in config file");
-        log.LogInformation("Resolve: Manually enter <check_id>:<Function_App>:<Function_Module> ");
-        return result1;
-    }
-  }
-
-  /*
   FileStream fsSource = new FileStream(path, FileMode.Open, FileAccess.Read);
   using (StreamReader sr = new StreamReader(fsSource))
   {
@@ -113,7 +88,7 @@ private static Tuple<string, string> ReadCheckConfig(string check_id, string pat
            return result1;
         }
 
-      } */
+      }
 
       log.LogInformation("Error: The Check Config file is Empty!!");
       return result1;
