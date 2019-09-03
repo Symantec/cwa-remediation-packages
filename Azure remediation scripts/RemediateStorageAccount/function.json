@@ -1,0 +1,11 @@
+{
+  "bindings": [
+    {
+      "name": "tuple1",
+      "type": "activityTrigger",
+      "direction": "in",
+      "activity": "RemediateStorageAccount"
+    }
+  ],
+  "disabled": false
+}
