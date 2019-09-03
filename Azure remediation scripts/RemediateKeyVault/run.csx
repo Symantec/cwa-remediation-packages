@@ -89,8 +89,10 @@ private static void update_key(string resource_id, string stoken, List<string> k
        httpResponseBody = httpResponse.Content.ReadAsStringAsync().Result.ToString();
   
        dynamic c = JsonConvert.DeserializeObject(httpResponseBody);
-       c.attributes.exp += 31556952;
-
+       if(c.attributes.exp==null)
+       {
+            c.attributes.exp = 31556952;
+       }
        var content = new StringContent(JsonConvert.SerializeObject(c), Encoding.UTF8, "application/json");
        var response = httpCl.PatchAsync(ep, content).Result;
 
