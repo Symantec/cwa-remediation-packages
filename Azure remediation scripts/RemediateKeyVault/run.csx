@@ -5,13 +5,13 @@
  * Before running this sample, please:
  * - create a Durable orchestration function
  * - create a Durable HTTP starter function
- */ 
-
+ */  
+ 
 #r "Microsoft.Azure.WebJobs.Extensions.DurableTask"
 #r "Newtonsoft.Json"
 #load "properties.csx"
  
-using System;
+using System; 
 using System.Net;
 using System.Net.Http;
 using System.Configuration;
@@ -47,31 +47,22 @@ private static string GetAccessToken(ILogger log1)
     return rs.access_token;    
 }
 
-private static keyv get_key(string resource_id,string stoken, ILogger log, string resource_name)
+private static string get_key_secret(string resource_id,string stoken, ILogger log, string resource_name,string endpoint)
 {
-    var obj = new keyv();
-    var httpCl = new HttpClient();
+        var httpCl = new HttpClient();
     httpCl.DefaultRequestHeaders.Add("Authorization", "Bearer " + stoken);
-    string endpoint = "";
-      
-    endpoint = endpoint + resource_id + "?api-version=2016-03-01";
     log.LogInformation("URL for API: "+endpoint);
-
-      endpoint = "https://" + resource_name + ".vault.azure.net/keys/?api-version=7.0";
-
       var httpResponse = new HttpResponseMessage();
       string httpResponseBody = "";
       httpResponse = httpCl.GetAsync(endpoint).Result;
       httpResponse.EnsureSuccessStatusCode();
       httpResponseBody = httpResponse.Content.ReadAsStringAsync().Result.ToString();
       log.LogInformation(httpResponseBody);
-      obj = JsonConvert.DeserializeObject<keyv>(httpResponseBody);
-      httpCl.Dispose();
-      httpResponse.Dispose();
-    return obj;
+    return httpResponseBody;
+  
 }
 
-private static void update_key(string resource_id, string stoken, List<string> kidList, ILogger log)
+private static void update_exp(string resource_id, string stoken, List<string> idList, ILogger log)
 {
   var httpCl = new HttpClient();
   httpCl.DefaultRequestHeaders.Add("Authorization", "Bearer " + stoken);
@@ -79,7 +70,7 @@ private static void update_key(string resource_id, string stoken, List<string> k
   var httpResponse = new HttpResponseMessage();
   string httpResponseBody = "";
 
-  foreach (string o in kidList)
+  foreach (string o in idList)
     {
        log.LogInformation(o);
        var ep = o + "?api-version=7.0";
@@ -100,11 +91,33 @@ private static void update_key(string resource_id, string stoken, List<string> k
 }
 public static void Key_Exp(string resource_id, ILogger log,string stoken,string resource_name){
 
-  var obj = new keyv();
-  obj = get_key(resource_id,stoken,log,resource_name);
+
+  string url = "https://" + resource_name + ".vault.azure.net/keys/?api-version=7.0";
+  string body = get_key_secret(resource_id,stoken,log,resource_name,url);
   var kidList = new List<string>();
-  kidList = GetKeyIDs(obj.value);
-  update_key(resource_id,stoken,kidList,log);
+    var obj = JsonConvert.DeserializeObject<keyv>(body);
+    foreach (keys k in obj.value)
+    {
+      string kk = k.kid;
+      kidList.Add(kk);
+    }
+  update_exp(resource_id,stoken,kidList,log);
+   
+}
+
+public static void Secret_Exp(string resource_id, ILogger log,string stoken,string resource_name){
+
+  string url = "https://" + resource_name + ".vault.azure.net/secrets/?api-version=7.0";
+  string body = get_key_secret(resource_id,stoken,log,resource_name,url);
+
+  var obj = JsonConvert.DeserializeObject<secretv>(body);
+    var sidList = new List<string>();
+    foreach (secrets s in obj.value)
+    {
+      string ss = s.id;
+      sidList.Add(ss);
+    }
+  update_exp(resource_id,stoken,sidList,log);
    
 }
 
@@ -118,6 +131,18 @@ private static List<string> GetKeyIDs(List<keys> val){
     return kidList;
 }
 
+private static List<string> GetSecretIDs(List<secrets> val){
+    var sidList = new List<string>();
+    foreach (secrets s in val)
+    {
+      string ss = s.id;
+      sidList.Add(ss);
+    }
+    return sidList;
+}
+
+
+
 public static void Run(Tuple<string, string, string> tuple1, ILogger log)
 {
    log.LogInformation("Activity function started...");
@@ -130,9 +155,16 @@ public static void Run(Tuple<string, string, string> tuple1, ILogger log)
    log.LogInformation("Remediation started for resource with ID: ");
    log.LogInformation(resource_id);
    log.LogInformation("Token for vault: " + stoken);
-  
-   log.LogInformation("Resource Name: " + resource_name);
+   log.LogInformation("Module ID: " + module_id);
 
+   log.LogInformation("Resource Name: " + resource_name);
+  if(module_id == "Key_Exp")
+  {
    Key_Exp(resource_id,log,stoken,resource_name);
+  }
+  else
+  {
+    Secret_Exp(resource_id,log,stoken,resource_name);
+  }
 
 }
