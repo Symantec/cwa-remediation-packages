@@ -1,4 +1,5 @@
 87231647-bea3-4c55-9f3b-d54937ba7513:RemediateKeyVault:Key_Exp
+169ba1b9-6d69-46a5-8c0a-2c59f0bc522e:RemediateKeyVault:Secret_Exp
 03e31856-a205-4aeb-abaf-5b0a1c56242f:RemediateLogProfiles:Log_Retention
 4A85A517-1967-4B3F-8911-36EDE3B65330:RemediateStorageAccount:SecureTransfer
 A57A6985-D966-466F-BA2E-7DE1FE62B58B:RemediateSQLDB:Data_Encryption
@@ -7,5 +8,6 @@ EF31C502-2BAE-4B6A-B3B3-60D39183B351:RemediateSQLDB:Threat_Retn90
 1CD910DD-9BFA-41BD-AE4A-64662536FE77:RemediateSQLDB:Send_Alert
 778A0216-90AA-47A5-9FD4-8FFF82823D9F:RemediateSQLDB:Detection_Type_All
 B1D6717E-11CE-43BE-97EF-2A01892E507F:RemediateSQLDB:Email_Service
-2DBED62E-0E4C-4008-A7A2-5AD81C82FDAA:RemediateSQLServer:Enable_ThreatD
 fa1fc772-82a8-41eb-98d8-5e178ec2a5a0:RemediateApplicationGateway:EnableWAF
+47bf577f-301e-43f5-a52b-bd5d9d69881b:RemediateApplicationGateway:EnablePrevention
+
