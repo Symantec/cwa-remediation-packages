@@ -1,0 +1,10 @@
+{
+  "bindings": [
+    {
+      "name": "tuple1",
+      "type": "activityTrigger",
+      "direction": "in"
+    }
+  ],
+  "disabled": false
+}
