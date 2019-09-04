@@ -27,6 +27,9 @@
 	* Resource Group Name
 	* Location - You can have one function app in one location.
 * Click Deploy.
+* Configure CLIENT_ID, CLIENT_SECRET, DIRECTORY_ID varibles under configuration.
+* Add event grid subscription as mentioned in remediation steps.
+* Compile the code (optional)
 
 For further details about Azure Remediation Steps, refer to the [documentation link](https://help.symantec.com/cs/SCWP/SCWA/v131901146_v127279924/title?locale=EN_US&sku=CWA)
 	
