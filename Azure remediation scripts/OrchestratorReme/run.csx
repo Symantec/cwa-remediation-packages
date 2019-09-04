@@ -137,7 +137,8 @@ public static void Run(DurableOrchestrationContext context, ILogger log, Executi
   string resource_type = GetResourceType(data.payload.resource.id);
   log.LogInformation("Resource Type : " + resource_type);
 
-  string resource_id = data.payload.resource.id; 
+  string resource_id = data.payload.resource.id;
+  string resource_name = data.payload.resource.name; 
   List<Check> checks = data.payload.checks;
   List<string> checklist = GetCheckIDs(checks);
 
@@ -158,9 +159,17 @@ public static void Run(DurableOrchestrationContext context, ILogger log, Executi
 
      if(b1){
 
-         log.LogInformation("Calling Function : "+ functionapp);
-         var tuple1 = Tuple.Create(moduleapp, resource_id, stoken);
-         context.CallActivityAsync(functionapp, tuple1);
+         if(functionapp == "RemediateKeyVault"){
+              log.LogInformation("Calling Function : "+ functionapp);
+              var tuple1 = Tuple.Create(moduleapp, resource_id,resource_name);
+              context.CallActivityAsync(functionapp, tuple1);
+         }
+         else {
+              log.LogInformation("Calling Function : "+ functionapp);
+              var tuple1 = Tuple.Create(moduleapp, resource_id, stoken);
+              context.CallActivityAsync(functionapp, tuple1);
+         }
+         
      }else{
          log.LogInformation("Error: Pre-requisite Function App or Module Name missing!!");
      }
