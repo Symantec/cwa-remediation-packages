@@ -32,6 +32,18 @@
 * Compile the code (optional)
 
 For further details about Azure Remediation Steps, refer to the [documentation link](https://help.symantec.com/cs/SCWP/SCWA/v131901146_v127279924/title?locale=EN_US&sku=CWA)
+
+## What's New:
+August 2k19 Refresh:
+* Orchestrator with .Net 2.0 Library Support.
+* Deployment Changes in azure_deploy.sh
+* Following List of Checks were Remediated:-
+- Ensure that Activity Log Retention is set 365 days or greater.
+- Ensure that the expiry date is set on all Keys.
+- Ensure that the expiry date is set on all Secrets.
+- Ensure that 'Secure transfer required' is set to 'Enabled'.
+- Is the Application Gateway Waf enabled.
+- Is the Application Gateway WAF prevention mode enabled.
 	
 -----------------------------------------------------------------------------------------------------------------------------------
 **Copyright © 2019 Symantec Corporation. All rights reserved.**
