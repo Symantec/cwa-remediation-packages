@@ -38,11 +38,64 @@ private static void Data_Encryption(string resource_id, ILogger log, string stok
    ep.properties = PropEnc;  
    var content = new StringContent(JsonConvert.SerializeObject(ep), Encoding.UTF8, "application/json");
    //log.LogInformation("content: ", content);
+
    var response = httpClient.PutAsync(endpoint,content).Result;
    string result = response.Content.ReadAsStringAsync().Result.ToString();
 
    log.LogInformation("SQL setting:" + result);
    string statuscode = response.StatusCode.ToString();
+
+   log.LogInformation("Status code for API:" + statuscode);
+}
+private static void Enable_Auditing(string resource_id, ILogger log, string stoken)
+{
+  string endpoint = "https://management.azure.com" + resource_id + "/extendedAuditingSettings/default?api-version=2017-03-01-preview"; 
+   var httpCl = new HttpClient();
+   httpCl.DefaultRequestHeaders.Add("Authorization", "Bearer " + stoken);
+   var httpResponse = new HttpResponseMessage();
+   string httpResponseBody = "";
+   httpResponse = httpCl.GetAsync(endpoint).Result;
+   httpResponse.EnsureSuccessStatusCode();
+   httpResponseBody = httpResponse.Content.ReadAsStringAsync().Result.ToString();
+
+   dynamic c = JsonConvert.DeserializeObject(httpResponseBody);
+   c.properties.state = "Enabled";
+
+
+   var httpClient = new HttpClient();
+   httpClient.DefaultRequestHeaders.Add("Authorization", "Bearer " + stoken);
+   var content = new StringContent(JsonConvert.SerializeObject(c), Encoding.UTF8, "application/json");
+   var response = httpClient.PutAsync(endpoint, content).Result;
+   string result = response.Content.ReadAsStringAsync().Result.ToString();
+   log.LogInformation("SQL setting:" + result);
+   var statuscode = response.StatusCode.ToString();
+
+   log.LogInformation("Status code for API:" + statuscode);
+}
+
+private static void Auditing_Retention(string resource_id, ILogger log, string stoken)
+{
+   string endpoint = "https://management.azure.com" + resource_id + "/auditingSettings/default?api-version=2017-03-01-preview";
+   var httpCl = new HttpClient();
+   httpCl.DefaultRequestHeaders.Add("Authorization", "Bearer " + stoken);
+   var httpResponse = new HttpResponseMessage();
+   string httpResponseBody = "";
+   httpResponse = httpCl.GetAsync(endpoint).Result;
+   httpResponse.EnsureSuccessStatusCode();
+   httpResponseBody = httpResponse.Content.ReadAsStringAsync().Result.ToString();
+
+   dynamic c = JsonConvert.DeserializeObject(httpResponseBody);
+ //  c.properties.state = "Enabled";
+   c.properties.retentionDays = 95;
+
+
+   var httpClient = new HttpClient();
+   httpClient.DefaultRequestHeaders.Add("Authorization", "Bearer " + stoken);
+   var content = new StringContent(JsonConvert.SerializeObject(c), Encoding.UTF8, "application/json");
+   var response = httpClient.PutAsync(endpoint, content).Result;
+   string result = response.Content.ReadAsStringAsync().Result.ToString();
+   log.LogInformation("SQL setting:" + result);
+   var statuscode = response.StatusCode.ToString();
 
    log.LogInformation("Status code for API:" + statuscode);
 }
@@ -212,6 +265,10 @@ public static void Run(Tuple<string, string, string> tuple1, ILogger log)
 
    if (module_id == "Email_Service"){
        Email_Service(resource_id, log, stoken);
+   }
+
+   if (module_id == "Auditing_Retention"){
+       Auditing_Retention(resource_id, log, stoken);
    }
    
    
