@@ -6,8 +6,8 @@
 using System;
 using System.IO;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
-
+using Newtonsoft.Json.Linq; 
+ 
 class ClientDetail
 {
     public string grant_type = "client_credentials";
@@ -27,7 +27,7 @@ class Result {
     public string resource {get;set;}
     public string access_token {get;set;}
 }
-
+ 
 private static string GetAccessToken(ILogger log1)
 {
     ClientDetail cd = new ClientDetail();    
@@ -126,7 +126,8 @@ public static void Run(DurableOrchestrationContext context, ILogger log, Executi
 {
   var event_data = context.GetInput<string>();
   var outputs = new List<string>();
-   
+     log.LogInformation("Event Data : " + event_data.ToString());
+
 
   //Check for event_data
   PayloadStruct data = JsonConvert.DeserializeObject<PayloadStruct>(event_data);
@@ -139,6 +140,7 @@ public static void Run(DurableOrchestrationContext context, ILogger log, Executi
 
   string resource_id = data.payload.resource.id;
   string resource_name = data.payload.resource.name; 
+  string acc_id = data.payload.resource.account_id;
   List<Check> checks = data.payload.checks;
   List<string> checklist = GetCheckIDs(checks);
 
@@ -149,32 +151,60 @@ public static void Run(DurableOrchestrationContext context, ILogger log, Executi
   log.LogInformation("Generating access token: ");
   string stoken = GetAccessToken(log);
   log.LogInformation("Token: "+ stoken);
-  
-  foreach (string check in checklist){
+   var check_list = new List<string>();
+   bool st = false;
+  foreach (string check in checklist)
+  {
      log.LogInformation("Check Traced: "+ check);
      Tuple<string,string> getFunctionApp = ReadCheckConfig(check, path, log);
      string functionapp = getFunctionApp.Item1;
      string moduleapp = getFunctionApp.Item2;
      bool b1 = HasValue(getFunctionApp);
-
-     if(b1){
+     
+    if(functionapp == "RemediateSecurityPolicy")
+    {
+         check_list.Add(moduleapp);
+        st = true;
+         
+    }
+    else
+    {
+     if(b1)
+     {
 
          if(functionapp == "RemediateKeyVault"){
               log.LogInformation("Calling Function : "+ functionapp);
               var tuple1 = Tuple.Create(moduleapp, resource_id,resource_name);
               context.CallActivityAsync(functionapp, tuple1);
          }
-         else {
+         else if (functionapp == "RemediateBlob")
+         {
+              log.LogInformation("Calling Function : "+ functionapp);
+              var tuple1 = Tuple.Create(moduleapp, resource_id, stoken, acc_id, resource_name);
+              context.CallActivityAsync(functionapp, tuple1);
+         }
+         else
+         {
               log.LogInformation("Calling Function : "+ functionapp);
               var tuple1 = Tuple.Create(moduleapp, resource_id, stoken);
               context.CallActivityAsync(functionapp, tuple1);
          }
          
-     }else{
+     }
+     }
+  }
+     if(st)
+     {
+           log.LogInformation("Calling Function: Remediate Security Policy");
+              var tuple1 = Tuple.Create(resource_id, stoken, check_list);
+              context.CallActivityAsync("SecRem", tuple1);
+     }
+     else
+     {
          log.LogInformation("Error: Pre-requisite Function App or Module Name missing!!");
      }
      /*test*/
-    }
+    
 
      
 
