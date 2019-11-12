@@ -197,7 +197,7 @@ public static void Run(DurableOrchestrationContext context, ILogger log, Executi
      {
            log.LogInformation("Calling Function: Remediate Security Policy");
               var tuple1 = Tuple.Create(resource_id, stoken, check_list);
-              context.CallActivityAsync("SecRem", tuple1);
+              context.CallActivityAsync("RemediateSecurityPolicy", tuple1);
      }
      else
      {
