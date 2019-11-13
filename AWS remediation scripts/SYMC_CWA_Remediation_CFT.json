@@ -25,12 +25,14 @@
 	"ClientID":{
     "Type":"String",
     "Description":"Client ID from CWA Settings-API Keys, required only if you want to update remediation status in CWA.",
-	"Default":"Not required in case UpdateStatusInCWA is false."
+	"Default":"Not required in case UpdateStatusInCWA is false.",
+	"NoEcho": true
 	},
 	"ClientSecretKey":{
     "Type":"String",
     "Description":"Client Secret Key from CWA Settings-API Keys, required only if you want to update remediation status in CWA.",
-	"Default":"Not required in case UpdateStatusInCWA is false."
+	"Default":"Not required in case UpdateStatusInCWA is false.",
+	"NoEcho": true
 	},
 	"CWARole":{
     "Type":"String",
