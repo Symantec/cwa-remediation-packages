@@ -9,7 +9,6 @@
 
 #r "Microsoft.Azure.WebJobs.Extensions.DurableTask"
 #r "Newtonsoft.Json"
-//#load "properties.csx"
 
 using System;
 using System.Net;
@@ -40,12 +39,11 @@ public static void setLogProfile(string endpoint,ILogger log, string stoken, dyn
    var content = new StringContent(JsonConvert.SerializeObject(c), Encoding.UTF8, "application/json");
    var response = httpClient.PutAsync(endpoint, content).Result;
    string result = response.Content.ReadAsStringAsync().Result.ToString();
-   log.LogInformation("SQL setting:" + result);
+   log.LogInformation("Log Profile setting:" + result);
    var statuscode = response.StatusCode.ToString();
 
    log.LogInformation("Status code for API:" + statuscode);
 }
-
 public static void Log_Retention(string resource_id, ILogger log,string stoken){
 
    
@@ -75,4 +73,6 @@ public static void Run(Tuple<string, string, string> tuple1, ILogger log)
 
   log.LogInformation("Token: " + stoken);
   Log_Retention(resource_id,log,stoken);
+
+
 }
